@@ -1,4 +1,6 @@
-import NextAuth, { AuthOptions } from 'next-auth'
+import { AuthOptions } from 'next-auth'
+import { prisma} from "@/configs/prisma";
+import { PrismaAdapter } from "@next-auth/prisma-adapter"; 
 
 import GitHubProvider from 'next-auth/providers/github'
 import GoogleProvider from 'next-auth/providers/google'
@@ -7,6 +9,7 @@ export const authOptions :AuthOptions = {
   theme: {
     logo: 'https://next-auth.js.org/img/logo/logo-sm.png',
   },
+  adapter: PrismaAdapter(prisma),
   providers: [
     GitHubProvider({
       name: "GitHub",

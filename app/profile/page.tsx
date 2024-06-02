@@ -1,6 +1,8 @@
+
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/configs/nextauth";
+import { TwoFactorAuth } from "@/configs/otp2fa";
 
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions);
@@ -8,6 +10,8 @@ export default async function ProfilePage() {
   if (!session) {
     return <div>Loading...</div>;
   }
+
+  const fa = await TwoFactorAuth()
 
   return (
     <div >
@@ -25,6 +29,8 @@ export default async function ProfilePage() {
         <div className="flex justify-center items-center">Email: {session.user?.email}</div>
         {/* Add more user information as needed */}
       </div>
+
+      <div>{fa}</div>
     </div>
   );
 }
