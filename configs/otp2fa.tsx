@@ -23,7 +23,7 @@ export async function  TwoFactorAuth() {
         secret: totpdb.secret,
         algorithm: totpdb.algorithm,
         issuer: totpdb.issuer,
-        issuerInLabel: totpdb.issuer,
+        issuerInLabel: false,
         period: totpdb.period,
         digits: totpdb.digits,
     })
@@ -31,7 +31,7 @@ export async function  TwoFactorAuth() {
     // setSecret(totpdb.secrect)
     // setPeriod(totpdb.period)
     // setOtpCode(totp.generate());
-    secret = totpdb.secrect
+    secret = totpdb.secret
     period = totpdb.period
     otpCode = totp.generate()
 

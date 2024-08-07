@@ -8,7 +8,7 @@ export async function insertOtp(totp : TOTP) {
     return prisma.optsecret.create({
         data: {
             label: totp.label,
-            secret: totp.secret,
+            secret: totp.secret.hex,
             algorithm: totp.algorithm,
             issuer: totp.issuer,
             period: totp.period,
