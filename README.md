@@ -60,33 +60,74 @@ npm run dev
 
 - [x] GitHub / Google OAuth 登录与登出（JWT session）
 - [x] OTP 密钥管理：粘贴 `otpauth://` URL 导入、列表展示、删除
-- [x] 个人主页实时展示 TOTP 验证码与倒计时进度条
-- [ ] 多用户数据隔离（密钥与登录用户关联）
+- [x] OTP 页面实时展示 TOTP 验证码与倒计时
+- [x] 账号登录控制访问：登录即可查看 / 管理密钥，未登录无法访问
+- [x] Chrome 插件云端同步（`/api/sync`，同一保险箱，乐观锁版本仲裁）
 
 ## 目录结构
 
 ```
 app/
-  api/auth/          NextAuth 路由
-  api/otp/           OTP 导入 / 删除 API
-  otp/               OTP 密钥管理页
-  profile/           个人主页
-  signin/ signout/   登录 / 登出页
-components/          navbar、登录按钮、OTP 管理组件等
-configs/
-  nextauth.tsx       NextAuth 配置
-  otp2fa.tsx         TOTP 生成逻辑
-  prisma.tsx         Prisma Client 与数据访问函数
-prisma/              schema 与迁移
+  api/auth/           NextAuth 路由
+  api/device-token/   设备令牌：连接 / 验证 / 轮询领取
+  api/vault/          云端保险箱读取 / 保存（账号密钥加密）
+  api/sync/           插件「立即同步」接口（与 Web 共用同一保险箱）
+  connect/            插件 OAuth 式自动连接页
+  otp/                OTP 密钥管理页（实时验证码，登录保护）
+  profile/            旧链接跳转至 /otp
+  signin/ signout/    登录 / 登出页
+  lib/                vault-crypto / vault-edit / device-auth / i18n
+components/           navbar、登录按钮、vault-display 保险箱组件等
+configs/              nextauth、prisma、cloud-vault、sync-vault、vault-cache
+prisma/               schema 与迁移
 ```
 
 ## 部署
 
-Vercel 一键部署需配置与本地相同的环境变量。构建流程（`vercel-build`）会自动执行：
+生产部署推荐 [Vercel](https://vercel.com) 一键部署。构建流程（`vercel-build`）会自动执行：
 
 ```bash
 prisma generate && prisma migrate deploy && next build
 ```
+
+### 方式一：Vercel Dashboard（推荐）
+
+1. **导入仓库**：打开 https://vercel.com/new → Import 仓库 `junka/private2fa`，Framework 选择 Next.js（自动使用上面的 `vercel-build` 脚本）。
+2. **配置环境变量**（Project → Settings → Environment Variables，共 8 个）：
+
+   | 变量 | 说明 |
+   | --- | --- |
+   | `POSTGRES_PRISMA_URL` | Prisma 连接串（连接池形式，如 Supabase 的 `6543` 带 `pgbouncer=true`） |
+   | `POSTGRES_URL_NON_POOLING` | 迁移直连串（非连接池，如 Supabase 的 `5432`） |
+   | `NEXTAUTH_URL` | **生产域名**，如 `https://<项目名>.vercel.app`（不能是 `localhost`） |
+   | `NEXTAUTH_SECRET` | 建议复用本地 `.env` 中的同一个值（`openssl rand -base64 32` 生成），否则现有登录会话全部失效 |
+   | `GITHUB_ID` / `GITHUB_SECRET` | GitHub OAuth App 凭据 |
+   | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google OAuth 凭据 |
+
+3. **Deploy**，等待构建完成即可访问。之后每次 push 到 main 分支会自动触发重新部署。
+
+> ⚠️ **OAuth 回调域名**：把 `https://<项目名>.vercel.app/api/auth/callback/github` 和 `.../google` 分别加入 GitHub OAuth App 与 Google 凭证的「授权回调」白名单，否则登录会报 `redirect_uri` 错误。
+
+### 方式二：Vercel CLI
+
+```bash
+vercel login                    # 首次需登录
+vercel link                     # 关联项目
+vercel env add NEXTAUTH_URL production    # 逐个添加上述 8 个变量
+vercel env add GITHUB_SECRET production
+# ... 其余变量同样添加
+vercel --prod                   # 部署
+```
+
+### 数据库说明
+
+- 部署使用与生产相同的 PostgreSQL（如 Supabase 免费库）。`prisma migrate deploy` 只应用 `prisma/migrations/` 中已有的迁移；若 schema 变更后尚未生成迁移（本地用 `prisma db push` 同步过），请先执行：
+
+  ```bash
+  npx prisma db push
+  ```
+
+- `prisma db push` 与 `migrate deploy` 幂等，可放心重复执行，不会清空数据。
 
 ## 注意事项
 
