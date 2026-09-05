@@ -1,24 +1,29 @@
-import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
-import { authOptions } from "@/configs/nextauth";
-// import { useSession, signIn, signOut } from "next-auth/react";
+"use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { useI18n } from "@/app/lib/i18n";
 import SignOutButton from "@/components/signoutbutton";
 
-const SignOutPage = async () => {
-  const session = await getServerSession(authOptions);
-  // const { data: session } = useSession();
+const SignOutPage = () => {
+  const { status } = useSession();
+  const router = useRouter();
+  const { t } = useI18n();
 
-  if (!session) {
-    redirect("/");
-  } else {
-    return (
-      <div className="flex justify-center items-center">
+  // 未登录访问直接回首页；loading 期间仅渲染空白占位
+  useEffect(() => {
+    if (status === "unauthenticated") router.replace("/");
+  }, [status, router]);
 
-        <SignOutButton />
-      </div>
-    );
-  }
+  if (status === "loading") return null;
+
+  return (
+    <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 p-8">
+      <p className="text-lg text-gray-700">{t("signOutConfirm")}</p>
+      <SignOutButton />
+    </div>
+  );
 };
 
 export default SignOutPage;

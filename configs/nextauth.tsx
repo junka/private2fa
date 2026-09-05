@@ -15,6 +15,8 @@ export const authOptions :AuthOptions = {
       name: "GitHub",
       clientId: process.env.GITHUB_ID!,
       clientSecret: process.env.GITHUB_SECRET!,
+      // GitHub 自 2026-04 起在回调中携带 RFC 9207 的 iss 参数，必须显式声明 issuer
+      issuer: "https://github.com/login/oauth",
     }),
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -29,12 +31,15 @@ export const authOptions :AuthOptions = {
     strategy: 'jwt',
   },
   callbacks: {
-    // async jwt({ token , trigger, session }) {
-    //   if (trigger === 'update') 
-    //     token.name = session.user.name
-    //   return token
-    // },
-    async session({ session, user }) {
+    // 把 user.id 放进 token，供 /api/vault 等接口按用户定位保险箱
+    async jwt({ token, user }) {
+      if (user && user.id) token.uid = user.id;
+      return token;
+    },
+    async session({ session, token }) {
+      // 优先用回调写入的 uid；兜底 token.sub（NextAuth 始终等于 userId，兼容旧 cookie）
+      const id = (token.uid as string | undefined) ?? (token.sub as string | undefined);
+      if (session.user && id) (session.user as { id?: string }).id = id;
       return session;
     },
   },

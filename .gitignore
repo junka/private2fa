@@ -26,6 +26,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
+.env
 .env*.local
 
 # vercel
@@ -34,3 +35,20 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local dev / debug artifacts (keep files, ignore from git)
+/cdp-*
+/probe-options.mjs
+/ext-check.png
+/ext-page-now.png
+/extensions-page.png
+/.mintest/
+/qr-test/
+/scripts/
+/trae-debug/
+
+# separate extension project (own package.json / node_modules)
+/chrome-extension/
+
+# trae workspace docs
+/.trae/

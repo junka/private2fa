@@ -1,43 +1,16 @@
-import Link from "next/link";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/configs/nextauth";
+import { NavLinks, type UserInfo } from "./nav-links";
 
+/** Server 端取登录态与用户信息，交给 client 子树渲染链接、语言切换与用户下拉 */
 const Navbar = async () => {
   const session = await getServerSession(authOptions);
+  const u = session?.user;
+  const user: UserInfo | null = u
+    ? { name: u.name ?? "", email: u.email ?? "", image: u.image ?? undefined }
+    : null;
 
-  return (
-    <nav className="bg-indigo-600 p-4">
-      <ul className="flex gap-x-4">
-        <li>
-          <Link href="/" className="text-white hover:underline">
-            Home
-          </Link>
-        </li>
-
-        {!session ? (
-          <li>
-            <Link href="/signin" className="text-white hover:underline">
-              Sign In
-            </Link>
-          </li>
-        ) : (
-          <>
-            <li>
-              <Link href="/profile" className="text-white hover:underline">
-                Profile
-              </Link>
-            </li>
-
-            <li>
-              <Link href="/signout" className="text-white hover:underline">
-                Sign Out
-              </Link>
-            </li>
-          </>
-        )}
-      </ul>
-    </nav>
-  );
+  return <NavLinks signedIn={!!u} user={user} />;
 };
 
 export { Navbar };

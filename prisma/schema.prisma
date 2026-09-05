@@ -27,13 +27,98 @@ model optsecret {
   digits    Int
 }
 
-model user {
-  id        Int      @id @default(autoincrement())
-  name      String
+// ---- NextAuth PrismaAdapter 必需模型 ----
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  cloudKey      String? // 账号密钥（base64 32B）：云端信封加密用，登录/设备令牌可解密
+  accounts      Account[]
+  sessions      Session[]
+  vault         VaultBackup?
+  devices       DeviceToken[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
 }
 
 model userauth {
   id        Int      @id @default(autoincrement())
   userid    Int
   type      String
+}
+
+// ---- 三层存储 L3：云端统一保险箱 ----
+// 每用户一份 E2EE 密文（Web 与所有扩展设备共享），metaVersion 乐观锁跨端仲裁。
+// 设备端为空时同步不写入：VaultBackup 仅在首次真实推送时创建。
+
+// 云端保险箱：用户唯一的 Envelope 密文，服务端不可读
+model VaultBackup {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  envelope      Json // Envelope 密文信封
+  metaVersion   Int      @default(0)
+  metaUpdatedAt BigInt   @default(0) // 毫秒时间戳
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// 设备令牌注册表：token → userId 绑定。
+// connect 时注册（同一用户同一规格名唯一，重复连接复用同一令牌，不产生空备份行）；
+// VaultBackup 仍懒创建（设备端为空时不写入任何备份数据）。
+model DeviceToken {
+  id         String   @id @default(cuid())
+  token      String   @unique
+  userId     String
+  deviceName String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, deviceName])
+}
+
+// ---- 已冻结：旧设备级备份（不再使用；不删表不删数据） ----
+model SyncBackup {
+  id            String   @id @default(cuid())
+  deviceToken   String   @unique
+  deviceName    String
+  envelope      Json // Envelope 密文信封
+  metaVersion   Int      @default(0)
+  metaUpdatedAt BigInt   @default(0) // 毫秒时间戳，Int 存不下（溢出），用 BigInt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
