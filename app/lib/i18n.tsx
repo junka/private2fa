@@ -82,6 +82,9 @@ const dicts: Record<Lang, Record<string, string>> = {
     // ===== 登录 / 退出 =====
     signInWith: "使用 {p} 登录",
     signOutConfirm: "确定要退出登录吗？",
+    signInTitle: "登录账户",
+    signInSub: "通过 OAuth 登录后即可使用云端保险箱",
+    signInAgree: "登录表示您同意受隐私政策约束",
 
     // ===== 扩展连接页 /connect =====
     connecting: "正在连接…",
@@ -189,6 +192,9 @@ const dicts: Record<Lang, Record<string, string>> = {
     // ===== Sign in / out =====
     signInWith: "Sign in with {p}",
     signOutConfirm: "Are you sure you want to sign out?",
+    signInTitle: "Sign in",
+    signInSub: "Sign in with OAuth to use your cloud vault",
+    signInAgree: "By signing in you agree to the Privacy Policy",
 
     // ===== /connect =====
     connecting: "Connecting…",
