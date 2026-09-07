@@ -93,6 +93,36 @@ const dicts: Record<Lang, Record<string, string>> = {
     fallbackShow: "收起令牌",
     copyToken: "复制令牌",
     copiedShort: "已复制",
+
+    // ===== 隐私政策 /privacy =====
+    privacyTitle: "隐私政策",
+    privacyUpdated: "生效日期：2026 年 9 月 7 日",
+    privacyIntro:
+      "OTP Safebox（private2fa）是一款开源的 TOTP 动态验证码保险箱。本政策说明在您使用本服务时，我们如何处理您的数据。",
+    pCollectTitle: "我们收集什么",
+    pCollectL1: "账号信息：通过 GitHub / Google 登录时获取的昵称、邮箱与头像。",
+    pCollectL2: "设备令牌：Chrome 插件与云端同步时生成的随机设备标识。",
+    pCollectL3:
+      "保险箱数据：您的 OTP 密钥。服务端仅保存经您账号密钥加密后的密文，无法读取明文；插件本地另以主密码（PBKDF2 + AES-GCM）端到端加密。",
+    pCollectL4: "匿名访问统计：通过 Google Analytics 收集页面访问情况（不含 OTP 数据）。",
+    pUseTitle: "我们如何使用",
+    pUseL1: "提供登录、密钥管理、跨设备同步等核心功能。",
+    pUseL2: "改进服务稳定性与页面体验。",
+    pUseL3: "我们不以任何形式向第三方出售您的个人信息，也不投放个性化广告。",
+    pStorageTitle: "数据存储与传输",
+    pStorageL1: "服务部署于 Vercel，数据存放于其 Neon PostgreSQL 数据库（东南亚区域）。",
+    pStorageL2: "OTP 密钥在服务端以密文保存，服务端无法解密；设备间同步传输的也仅为密文。",
+    pStorageL3: "登录会话使用安全的 HttpOnly Cookie 维持。",
+    pThirdTitle: "第三方服务",
+    pThirdL1: "GitHub / Google：账号登录认证。",
+    pThirdL2: "Vercel / Neon：应用托管与数据库。",
+    pThirdL3: "Google Analytics：匿名页面统计。",
+    pRightsTitle: "您的权利",
+    pRightsL1: "查看与导出：登录后即可查看全部验证码；可从 Chrome 插件「立即同步」获取密文。",
+    pRightsL2: "删除：可随时在页面或插件中删除单个密钥；清除云端保险箱后，服务端数据即刻不可用。",
+    pRightsL3: "注销：删除账号请联系我们，我们会在收到请求后删除相关云端数据。",
+    pContactTitle: "联系我们",
+    pContactL1: "相关疑问或请求，请通过 GitHub Issues 提交：https://github.com/junka/private2fa/issues",
   },
   en: {
     // ===== banner =====
@@ -171,6 +201,36 @@ const dicts: Record<Lang, Record<string, string>> = {
     fallbackShow: "Hide token",
     copyToken: "Copy token",
     copiedShort: "Copied",
+
+    // ===== Privacy policy /privacy =====
+    privacyTitle: "Privacy Policy",
+    privacyUpdated: "Effective date: September 7, 2026",
+    privacyIntro:
+      "OTP Safebox (private2fa) is an open-source TOTP authenticator vault. This policy explains how we handle your data when you use this service.",
+    pCollectTitle: "What we collect",
+    pCollectL1: "Account information: nickname, email and avatar obtained when you sign in with GitHub / Google.",
+    pCollectL2: "Device tokens: random device identifiers generated for Chrome extension cloud sync.",
+    pCollectL3:
+      "Vault data: your OTP keys. The server only stores ciphertext encrypted with your account key and cannot read plaintext; the extension additionally encrypts locally with your master password (PBKDF2 + AES-GCM, end-to-end).",
+    pCollectL4: "Anonymous analytics: page-visit statistics via Google Analytics (no OTP data).",
+    pUseTitle: "How we use it",
+    pUseL1: "To provide core features: sign-in, key management and cross-device sync.",
+    pUseL2: "To improve service stability and page experience.",
+    pUseL3: "We never sell your personal information to third parties, and we show no personalized ads.",
+    pStorageTitle: "Storage & transfer",
+    pStorageL1: "The service is hosted on Vercel; data lives in its Neon PostgreSQL database (Southeast Asia region).",
+    pStorageL2: "OTP keys are stored as ciphertext on the server, which cannot decrypt them; only ciphertext travels between devices.",
+    pStorageL3: "Sign-in sessions are kept with secure HttpOnly cookies.",
+    pThirdTitle: "Third-party services",
+    pThirdL1: "GitHub / Google: sign-in authentication.",
+    pThirdL2: "Vercel / Neon: hosting and database.",
+    pThirdL3: "Google Analytics: anonymous page statistics.",
+    pRightsTitle: "Your rights",
+    pRightsL1: "View & export: after signing in you can view all codes; ciphertext can be obtained via “Sync now” in the Chrome extension.",
+    pRightsL2: "Delete: remove individual keys anytime on the page or in the extension; after clearing the cloud vault, server-side data is immediately unavailable.",
+    pRightsL3: "Account deletion: contact us and we will remove related cloud data upon request.",
+    pContactTitle: "Contact us",
+    pContactL1: "For questions or requests, file a GitHub Issue: https://github.com/junka/private2fa/issues",
   },
 };
 
