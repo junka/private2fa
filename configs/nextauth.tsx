@@ -47,5 +47,6 @@ export const authOptions :AuthOptions = {
     secret: process.env.NEXTAUTH_SECRET,
   },
   secret: process.env.NEXTAUTH_SECRET,
-  debug: true,
+  // 仅本地开发打印调试日志，避免生产暴露 token/cookie 细节
+  debug: process.env.NODE_ENV !== "production",
 }

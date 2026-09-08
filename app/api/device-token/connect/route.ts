@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/configs/nextauth";
 import { prisma } from "@/configs/prisma";
 import { randomBytes } from "crypto";
-import { putPending } from "../pending-store";
+import { putPending, pendingCountForDevice, MAX_PENDING_PER_DEVICE } from "../pending-store";
 
 /**
  * OAuth 式自动连接（polling 版）：
@@ -38,6 +38,12 @@ export async function GET(request: NextRequest) {
 
   // 展示名 = 网页用户名（无" · Chrome 扩展"后缀）
   const name = session.user.name ?? "user";
+
+  // 每设备并发 pending 上限：正常流程同设备一次仅 1 条在途连接；
+  // 超过上限说明连接未完成被反复发起（或滥用），直接拒绝避免内存灌入
+  if (pendingCountForDevice(device.token) >= MAX_PENDING_PER_DEVICE) {
+    return NextResponse.json({ error: "too many pending connects" }, { status: 429 });
+  }
 
   putPending(cid, device.token, name);
   return NextResponse.json({ ok: true, token: device.token, name });
