@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>OTP Safebox 设置</title>
+  <style>
+    :root { --indigo: #4f46e5; --indigo-dark: #4338ca; --bg: #f8fafc; --card: #fff;
+      --text: #0f172a; --muted: #64748b; --border: #e2e8f0; --green: #16a34a; --red: #dc2626; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font: 14px/1.6 system-ui, -apple-system, "PingFang SC", sans-serif;
+      background: var(--bg); color: var(--text); padding: 24px; }
+    .wrap { max-width: 720px; margin: 0 auto; }
+    h1 { font-size: 18px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    h2 { font-size: 14px; margin-bottom: 10px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--indigo); }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 16px 18px; margin-bottom: 14px; }
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 8px 0; }
+    .muted { color: var(--muted); font-size: 13px; }
+    input[type="password"], input[type="text"], select, textarea {
+      width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 13px; background: #fff; font-family: inherit; }
+    textarea { resize: vertical; min-height: 64px; font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
+    button { cursor: pointer; border: none; border-radius: 8px; padding: 8px 14px; font-size: 13px; font-weight: 500; }
+    .btn-primary { background: var(--indigo); color: #fff; }
+    .btn-primary:hover { background: var(--indigo-dark); }
+    .btn-ghost { background: transparent; color: var(--indigo); }
+    .btn-danger { background: transparent; color: var(--red); }
+    .btn-sm { padding: 4px 10px; font-size: 12px; }
+    .err { color: var(--red); font-size: 13px; margin-top: 6px; }
+    .ok { color: var(--green); font-size: 13px; margin-top: 6px; }
+    .switch { position: relative; width: 38px; height: 21px; display: inline-block; flex-shrink: 0; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; inset: 0; background: #cbd5e1; border-radius: 999px; transition: .2s; }
+    .slider::before { content: ""; position: absolute; width: 17px; height: 17px; left: 2px; top: 2px;
+      background: #fff; border-radius: 50%; transition: .2s; }
+    .switch input:checked + .slider { background: var(--indigo); }
+    .switch input:checked + .slider::before { transform: translateX(17px); }
+    .acct { display: flex; align-items: center; gap: 8px; padding: 8px 2px; border-bottom: 1px solid var(--border); }
+    .acct:last-child { border-bottom: none; }
+    .acct .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .acct .issuer { color: var(--muted); font-size: 12px; }
+    .acct-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--border); }
+    .acct-item:last-child { border-bottom: none; }
+    .acct-fields { flex: 1; display: grid; grid-template-columns: 1fr 1.3fr 1.6fr 1.1fr; gap: 6px; min-width: 0; }
+    .acct-fields input, .acct-fields select { width: auto; padding: 5px 8px; font-size: 12px; }
+    .acct-actions { flex-shrink: 0; }
+    .export-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+    .export-row h2 { margin-bottom: 0; }
+    .export-actions { display: flex; align-items: center; gap: 8px; }
+    .export-actions .status { margin-top: 0; }
+    .clickable { cursor: pointer; }
+    .clickable:hover { color: var(--indigo); }
+    .btn-mini { padding: 2px 8px; font-size: 12px; background: #fff; color: var(--muted); border: 1px solid var(--border); flex-shrink: 0; }
+    .btn-mini:hover { color: var(--indigo); border-color: var(--indigo-dark); }
+    .group-item { display: flex; align-items: center; gap: 8px; padding: 6px 2px; }
+    .group-item input { flex: 1; }
+    .status { font-size: 12px; color: var(--muted); margin-top: 6px; word-break: break-all; }
+    .btn-add { min-width: 36px; white-space: nowrap; flex-shrink: 0; }
+    .btn-add .add-x { display: none; }
+    @media (max-width: 600px) {
+      .btn-add .add-txt { display: none; }
+      .btn-add .add-x { display: inline; }
+      .acct-fields { grid-template-columns: 1fr 1fr; }
+    }
+    .empty { text-align: center; padding: 18px 0; color: var(--muted); }
+    .lock-screen { max-width: 380px; margin: 40px auto; }
+  </style>
+</head>
+<body>
+  <div class="wrap" id="app"></div>
+  <script src="options.js"></script>
+</body>
+</html>

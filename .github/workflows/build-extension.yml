@@ -1,0 +1,59 @@
+name: Build Extension on Release
+
+# 发布 GitHub Release 时自动打包扩展（Chrome/Edge 与 Firefox 两个 zip 并上传为 release 资产）。
+# 也可手动触发（workflow_dispatch）进行本地验证构建产物。
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write # 上传 release 资产需要
+
+jobs:
+  build-extension:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: chrome-extension
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: chrome-extension/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build extension
+        run: npm run build
+
+      # AMO 对 errors 返回非零退出码，提前拦截不合格的 Firefox 包
+      - name: Lint for AMO (web-ext)
+        run: npx -y web-ext lint --source-dir dist --output text
+
+      - name: Package Chrome/Edge zip
+        run: |
+          VERSION="$(node -p "require('./manifest.json').version")"
+          mkdir -p release
+          cd dist
+          zip -r -X "../release/otp-safebox-${VERSION}.zip" . -x "*.DS_Store"
+
+      - name: Package Firefox zip
+        run: |
+          VERSION="$(node -p "require('./manifest.json').version")"
+          mkdir -p release
+          cd dist
+          zip -r -X "../release/otp-safebox-${VERSION}-firefox.zip" . -x "*.DS_Store"
+
+      - name: Show artifacts
+        run: ls -la release
+
+      - name: Upload to release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: chrome-extension/release/*.zip

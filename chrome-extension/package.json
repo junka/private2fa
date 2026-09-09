@@ -1,0 +1,21 @@
+{
+  "name": "otp2fa-extension",
+  "private": true,
+  "version": "0.1.0",
+  "description": "OTP Safebox Chrome extension - 本地加密 TOTP 保险箱，三层存储",
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "jsqr": "^1.4.0",
+    "otpauth": "^9.3.0",
+    "webextension-polyfill": "^0.12.0"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.287",
+    "@types/webextension-polyfill": "^0.12.6",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.6.0"
+  }
+}

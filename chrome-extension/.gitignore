@@ -1,0 +1,7 @@
+# 构建产物与本地依赖，不入 git（CI 会重新生成）
+node_modules/
+dist/
+release/
+
+# 本地调试截图脚本产生物
+output/
