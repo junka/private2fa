@@ -1,0 +1,47 @@
+name: CI
+
+# 服务端（Next.js）CI：依赖安装 → Prisma 生成 → 类型检查 → ESLint → 生产构建 → 依赖漏洞审计
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  server-ci:
+    runs-on: ubuntu-latest
+    env:
+      # 仅满足 next build 阶段的环境校验，非真实密钥
+      NEXTAUTH_SECRET: ci-dummy-secret
+      NEXTAUTH_URL: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      # 依赖漏洞扫描（报告式，不阻断）：
+      # next 14 已 EOL，剩余 critical/high advisory（Image Optimizer DoS 等）需迁移 next 16 后清零。
+      # 升级后可将 continue-on-error 移除，改为硬性拦截。
+      - name: Dependency audit
+        run: npm audit
+        continue-on-error: true
