@@ -26,8 +26,7 @@ const LIMITS: Array<{ prefix: string; limit: number }> = [
 
 function clientIp(request: NextRequest): string {
   const fwd = request.headers.get("x-forwarded-for");
-  if (fwd) return fwd.split(",")[0].trim();
-  return request.ip ?? "unknown";
+  return fwd ? fwd.split(",")[0].trim() : "unknown";
 }
 
 export function middleware(request: NextRequest) {
