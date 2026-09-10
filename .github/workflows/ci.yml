@@ -39,9 +39,7 @@ jobs:
       - name: Build
         run: npm run build
 
-      # 依赖漏洞扫描（报告式，不阻断）：
-      # next 14 已 EOL，剩余 critical/high advisory（Image Optimizer DoS 等）需迁移 next 16 后清零。
-      # 升级后可将 continue-on-error 移除，改为硬性拦截。
+      # 依赖漏洞扫描（严格阻断）：high/critical 漏洞直接使 CI 失败。
+      # 当前已知项：next 14 已 EOL，Image Optimizer DoS 等 advisory 需迁移 next 16 后清零。
       - name: Dependency audit
-        run: npm audit
-        continue-on-error: true
+        run: npm audit --audit-level=high
