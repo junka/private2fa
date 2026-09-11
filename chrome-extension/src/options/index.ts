@@ -154,7 +154,8 @@ function render(): void {
         <button class="btn-ghost btn-sm" id="closeNotice" style="float:right;padding:2px 8px">×</button>
       </div>`
     : "";
-  app.innerHTML = notice + (unlocked && vault ? mainScreen() : lockScreen());
+  const parsed = new DOMParser().parseFromString(notice + (unlocked && vault ? mainScreen() : lockScreen()), "text/html");
+  app.replaceChildren(...Array.from(parsed.body.childNodes));
   const close = $("closeNotice");
   if (close) close.addEventListener("click", () => { connectNotice = ""; render(); });
   if (unlocked && vault) {

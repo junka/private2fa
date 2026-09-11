@@ -33,8 +33,8 @@ let connecting = false;
 function render(): void {
   const app = $("app");
   const view: View = !(getMasterHashSync()) ? "setup" : vault ? "main" : "locked";
-  app.innerHTML =
-    view === "setup" ? setupHtml() : view === "locked" ? lockedHtml() : mainHtml();
+  const parsed = new DOMParser().parseFromString(view === "setup" ? setupHtml() : view === "locked" ? lockedHtml() : mainHtml(), "text/html");
+  app.replaceChildren(...Array.from(parsed.body.childNodes));
   bind(view);
   if (view === "main") startTicker();
 }

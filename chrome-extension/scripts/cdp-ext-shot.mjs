@@ -11,6 +11,7 @@ import { fileURLToPath } from "node:url";
 
 const EXT_ID = "congbelljckfecpfjopmgfenalcjbpfi";
 const which = process.argv[2] || "options";
+const CDP_PORT = process.env.CDP_PORT ?? 9222;
 const out = join(
   dirname(fileURLToPath(import.meta.url)),
   "..", "release", "screenshots",
@@ -21,7 +22,7 @@ mkdirSync(dirname(out), { recursive: true });
 async function findTarget() {
   for (let i = 0; i < 60; i++) {
     try {
-      const res = await fetch("http://127.0.0.1:9222/json");
+      const res = await fetch(`http://127.0.0.1:${CDP_PORT}/json`);
       const list = await res.json();
       const t = list.find((t) => t.type === "page" && t.url.includes(`${EXT_ID}/${which}.html`));
       if (t) return t;

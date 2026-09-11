@@ -10,6 +10,7 @@ import { fileURLToPath } from "node:url";
 
 const EXT_ID = "congbelljckfecpfjopmgfenalcjbpfi";
 const which = process.argv[2] || "options";
+const CDP_PORT = process.env.CDP_PORT ?? 9222;
 const outName = which === "popup" ? "shot-popup.png" : "shot-options-list.png";
 const out = join(dirname(fileURLToPath(import.meta.url)), "..", "release", "screenshots", outName);
 mkdirSync(dirname(out), { recursive: true });
@@ -18,7 +19,7 @@ const demo = JSON.parse(readFileSync("/tmp/demo-state.json", "utf8"));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function getTarget() {
-  const list = await fetch("http://127.0.0.1:9222/json").then((r) => r.json());
+  const list = await fetch(`http://127.0.0.1:${CDP_PORT}/json`).then((r) => r.json());
   return list.find((t) => t.type === "page" && t.url === `chrome-extension://${EXT_ID}/${which}.html`);
 }
 
