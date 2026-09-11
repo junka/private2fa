@@ -137,6 +137,24 @@ vercel --prod                   # 部署
 
 - `prisma db push` 与 `migrate deploy` 幂等，可放心重复执行，不会清空数据。
 
+### 方式三：Cloudflare 免费档防护（可选）
+
+在 Vercel 前面套一层 Cloudflare 代理，获得 DDoS 防护、托管 WAF 与网络层限频（替代/补充应用层限频）。代码侧已适配 `CF-Connecting-IP`（见 `middleware.ts`），接入后真实客户端 IP 仍可被限频正确识别。
+
+前置条件：**需要自有域名**（Cloudflare 仅托管注册域，`*.vercel.app` 无法直接加 zone）。步骤：
+
+1. 注册域名并在 Cloudflare 添加站点（Free 计划即可），把 NS 切换到 Cloudflare 分配的两个。
+2. 添加 DNS 记录：`otp.example.com  CNAME → <项目名>.vercel.app`，开启橙色云（Proxied）。
+3. Vercel 项目 → Settings → Domains → 添加 `otp.example.com`（Vercel 自动签发 TLS）。
+4. 环境变量与回调迁移到新域名：
+   - `NEXTAUTH_URL` 改为 `https://otp.example.com`（回调查验依赖，旧值会使登录失效）
+   - GitHub / Google OAuth 授权回调白名单追加 `https://otp.example.com/api/auth/callback/*`
+   - 扩展「同步与云端」的后端地址改为新域名，重新执行一次扩展连接
+5. Cloudflare 侧建议：Security Level 置 Medium；开启 Bot Fight Mode；Web Firewall → 限频规则可针对 `/api/*` 加网络层速率限制。
+6. 隐私：Cloudflare 作为基础设施（CDN / 反向代理）会经手流量但不读 OTP 密文（E2EE），`/privacy` 页需补一句披露 Cloudflare 为流量基础设施；CF 参与 EU-U.S. Data Privacy Framework，无需额外 DPA。
+
+> 兼容提示：接代理后 `x-forwarded-for` 首段恒为 CF 边缘 IP，若后续移除 Cloudflare，middleware 自动回退 XFF 取真实 IP，无需改代码。
+
 ## Chrome 扩展
 
 `chrome-extension/` 是独立的小项目（自有 `package.json` / `tsconfig.json`），随 Web 端同一仓库维护。
