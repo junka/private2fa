@@ -55,7 +55,7 @@ npx prisma db push
 npm run dev
 ```
 
-打开 http://localhost:3000 ，登录后进入「OTP 管理」页面。
+打开 http://localhost:3000 ，登录后进入「个人主页」（`/profile`，OTP 管理 + 实时验证码一体）。
 
 ## 功能
 
@@ -192,4 +192,4 @@ git tag v0.1.1 && git push origin v0.1.1   # 推送 tag
 otpauth://totp/Private2FA:Test%3ADemo?issuer=Private2FA&secret=6HYJRTQTCJ55L7SYZEO3MSKDRVNK24ES&algorithm=SHA1&digits=6&period=30
 ```
 
-粘贴到「OTP 管理」页即可导入，个人主页会显示动态验证码。
+粘贴到「个人主页」（`/profile`）的 OTP 管理区即可导入，页面实时显示动态验证码。
