@@ -6,11 +6,12 @@
 
 ## 技术栈
 
-- [Next.js 14](https://nextjs.org/)（App Router）
+- [Next.js 15](https://nextjs.org/)（App Router）+ React 19
 - [NextAuth.js 4](https://next-auth.js.org/)（GitHub / Google OAuth，JWT session）
 - [Prisma](https://www.prisma.io/) + PostgreSQL
 - [otpauth](https://github.com/hectorm/otpauth)（TOTP 解析与生成）
 - Tailwind CSS
+- Chrome 扩展（Manifest V3，`webextension-polyfill` 兼容 Chrome / Edge / Firefox）
 
 ## 快速开始
 
@@ -62,24 +63,31 @@ npm run dev
 - [x] OTP 密钥管理：粘贴 `otpauth://` URL 导入、列表展示、删除
 - [x] OTP 页面实时展示 TOTP 验证码与倒计时
 - [x] 账号登录控制访问：登录即可查看 / 管理密钥，未登录无法访问
-- [x] Chrome 插件云端同步（`/api/sync`，同一保险箱，乐观锁版本仲裁）
+- [x] 云端统一保险箱（`/api/sync`，E2EE 密文，乐观锁版本仲裁）
+- [x] Chrome 扩展：AES-256-GCM 本地加密、截图二维码识别导入、三层存储（本地 L1 / Chrome 同步镜像 L2 / 账号云同步 L3）
+- [x] 安全防护：敏感 API IP 限频、设备连接 pending 上限、依赖漏洞扫描
 
 ## 目录结构
 
 ```
 app/
   api/auth/           NextAuth 路由
-  api/device-token/   设备令牌：连接 / 验证 / 轮询领取
+  api/device-token/   设备令牌：连接 / 验证 / 轮询领取（含 pending 上限）
   api/vault/          云端保险箱读取 / 保存（账号密钥加密）
+  api/otp/            遗留只读接口（旧数据一次性迁移）
   api/sync/           插件「立即同步」接口（与 Web 共用同一保险箱）
   connect/            插件 OAuth 式自动连接页
-  otp/                OTP 密钥管理页（实时验证码，登录保护）
-  profile/            旧链接跳转至 /otp
+  privacy/            隐私政策页
+  profile/            OTP 管理 + 个人主页（实时验证码，登录保护）
+  otp/                旧路由，跳转至 /profile
   signin/ signout/    登录 / 登出页
   lib/                vault-crypto / vault-edit / device-auth / i18n
 components/           navbar、登录按钮、vault-display 保险箱组件等
-configs/              nextauth、prisma、cloud-vault、sync-vault、vault-cache
+configs/              nextauth、prisma、cloud-vault、sync-vault、rate-limit、vault-cache
+middleware.ts         CORS 头 + 敏感 API IP 限频
 prisma/               schema 与迁移
+chrome-extension/     浏览器扩展（独立小项目，见「Chrome 扩展」节）
+.github/workflows/    CI / 发布流水线（见「CI 与自动发布」节）
 ```
 
 ## 部署
@@ -128,6 +136,47 @@ vercel --prod                   # 部署
   ```
 
 - `prisma db push` 与 `migrate deploy` 幂等，可放心重复执行，不会清空数据。
+
+## Chrome 扩展
+
+`chrome-extension/` 是独立的小项目（自有 `package.json` / `tsconfig.json`），随 Web 端同一仓库维护。
+
+```bash
+cd chrome-extension
+npm install
+npm run build      # esbuild 打包到 dist/（popup / options / background / 图标）
+npm run typecheck  # tsc --noEmit
+```
+
+手动打包（发布到商店）：
+
+```bash
+cd dist && zip -r ../release/otp-safebox-<版本>.zip . -x "*.DS_Store"
+# Firefox 包用同样的 dist，命名加 -firefox 后缀
+```
+
+跨浏览器要点：
+
+- **一个 manifest 通吃 Chrome / Edge / Firefox**：`background` 同时声明 `service_worker`（Chrome/Edge 使用）与 `scripts`（Firefox 以事件页模式运行，SW 字段被忽略会产生一条 AMO 静态警告，属预期可提交）
+- Firefox 必需项：`browser_specific_settings.gecko.id`、`strict_min_version`（142+，`data_collection_permissions` 需该版本）、`data_collection_permissions` 声明不收集数据
+- 扩展通过 Web 端 `middleware.ts` 的 CORS 头跨域请求 `/api/*`，manifest 无需 `host_permissions`
+
+发布扩展走 GitHub Release（见下节），或直接取 `chrome-extension/release/` 下最新的 zip 上传商店。
+
+## CI 与自动发布
+
+| Workflow | 触发 | 内容 |
+| --- | --- | --- |
+| `build-extension.yml` | GitHub Release `published` / 手动 | 构建扩展 → `web-ext lint`（AMO 错误拦截）→ 打包 Chrome/Edge 与 Firefox 两个 zip → 上传为 Release 资产 |
+| `ci.yml` | push main / PR | 服务端：`prisma generate` → `tsc --noEmit` → `eslint` → `next build` → `npm audit`（high/critical 严格失败） |
+| `codeql.yml` | push main / PR / 每周 | CodeQL 静态安全扫描，结果见 `Security → Code scanning` |
+
+发布扩展的标准流程：
+
+```bash
+git tag v0.1.1 && git push origin v0.1.1   # 推送 tag
+# GitHub 上基于该 tag 创建 Release → 自动打包上传，无需本地手动打 zip
+```
 
 ## 注意事项
 
