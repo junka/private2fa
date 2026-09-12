@@ -155,6 +155,17 @@ vercel --prod                   # 部署
 
 > 兼容提示：接代理后 `x-forwarded-for` 首段恒为 CF 边缘 IP，若后续移除 Cloudflare，middleware 自动回退 XFF 取真实 IP，无需改代码。
 
+### 方式四：自托管 / 其他 PaaS（Railway · Render · Fly.io · Zeabur）
+
+仓库内置 [Dockerfile](Dockerfile)（基于 Next.js 官方 multi-stage + standalone，非 root 运行），可在任何支持 Docker 的平台一键部署。
+
+1. 平台侧按文档引入本项目（Railway/Render/Zeabur 自动识别；Fly.io 用 `fly launch` 指向 Dockerfile）。
+2. 配置环境变量：`POSTGRES_PRISMA_URL`、`POSTGRES_URL_NON_POOLING`、`NEXTAUTH_SECRET`、`NEXTAUTH_URL`、`GITHUB_ID`、`GITHUB_SECRET`、`GOOGLE_CLIENT_ID`、`GOOGLE_CLIENT_SECRET`（同 Vercel）。
+3. 启动时自动执行 `prisma migrate deploy`（幂等），无需手动迁移。
+4. 域名与 OAuth 迁移：`NEXTAUTH_URL` 改为新域名 → GitHub / Google 回调白名单添加 `https://新域名/api/auth/callback/*` → 扩展「同步与云端」后端地址改为新域名并重新连接。
+5. **单实例前提**：IP 限频与 `pending-store` 为内存实现，多副本部署需换共享存储（如 Redis）；单副本开箱即用。用 `$PORT`（Dockerfile 已声明 3000 默认，平台自动注入）。
+6. 平台差异：Render 免费档 Web Service 无请求时休眠（冷启动延迟约 1 分钟）；Fly.io 可选区域就近部署。
+
 ## Chrome 扩展
 
 `chrome-extension/` 是独立的小项目（自有 `package.json` / `tsconfig.json`），随 Web 端同一仓库维护。
